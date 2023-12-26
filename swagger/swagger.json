@@ -1,0 +1,362 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "beego Test API",
+        "description": "beego has a very cool tools to autogenerate documents for your API",
+        "version": "1.0.0",
+        "termsOfService": "http://beego.me/",
+        "contact": {
+            "email": "astaxie@gmail.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        }
+    },
+    "basePath": "/v1",
+    "paths": {
+        "/derechos_pecuniarios/": {
+            "post": {
+                "tags": [
+                    "derechos_pecuniarios"
+                ],
+                "description": "Agregar un concepto",
+                "operationId": "DerechosPecuniariosController.PostConcepto",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "body Agregar Concepto content",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/{}"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{}"
+                    },
+                    "400": {
+                        "description": "body is empty"
+                    }
+                }
+            }
+        },
+        "/derechos_pecuniarios/actualizar_valor": {
+            "post": {
+                "tags": [
+                    "derechos_pecuniarios"
+                ],
+                "description": "Añadir el costo de un concepto existente",
+                "operationId": "DerechosPecuniariosController.PutCostoConcepto",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "body Inhabilitar Proyecto content",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/{}"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{}"
+                    },
+                    "400": {
+                        "description": ":body is empty"
+                    }
+                }
+            }
+        },
+        "/derechos_pecuniarios/clonar": {
+            "post": {
+                "tags": [
+                    "derechos_pecuniarios"
+                ],
+                "description": "Clona los conceptos de la vigencia anterior en la vigencia actual",
+                "operationId": "DerechosPecuniariosController.PostClonarConceptos",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "body Clonar Conceptos content",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/{}"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{}"
+                    },
+                    "400": {
+                        "description": "body is empty"
+                    }
+                }
+            }
+        },
+        "/derechos_pecuniarios/consultar_persona/{persona_id}": {
+            "get": {
+                "tags": [
+                    "derechos_pecuniarios"
+                ],
+                "description": "get información del estudainte por el id de tercero",
+                "operationId": "DerechosPecuniariosController.GetConsultarPersona",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "persona_id",
+                        "description": "Id del tercero",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{}"
+                    },
+                    "404": {
+                        "description": "not found resource"
+                    }
+                }
+            }
+        },
+        "/derechos_pecuniarios/estado_recibos/{persona_id}/{id_periodo}": {
+            "get": {
+                "tags": [
+                    "derechos_pecuniarios"
+                ],
+                "description": "consultar los estados de todos los recibos de derechos pecuniarios generados por el tercero",
+                "operationId": "DerechosPecuniariosController.GetEstadoRecibo",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "persona_id",
+                        "description": "Id del tercero",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "in": "path",
+                        "name": "id_periodo",
+                        "description": "Id del ultimo periodo",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{}"
+                    },
+                    "404": {
+                        "description": "not found resource"
+                    }
+                }
+            }
+        },
+        "/derechos_pecuniarios/generar_derecho": {
+            "post": {
+                "tags": [
+                    "derechos_pecuniarios"
+                ],
+                "description": "Generar un recibo de derecho pecuniario por parte de estudiantes",
+                "operationId": "DerechosPecuniariosController.PostGenerarrDerechoPecuniarioEstudiante",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "body Clonar Conceptos content",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/{}"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{}"
+                    },
+                    "400": {
+                        "description": "body is empty"
+                    },
+                    "404": {
+                        "description": "not found resource"
+                    }
+                }
+            }
+        },
+        "/derechos_pecuniarios/respuesta_solicitud/{id}": {
+            "post": {
+                "tags": [
+                    "derechos_pecuniarios"
+                ],
+                "description": "Da respuesta a la solicitud de derechos pecuniarios",
+                "operationId": "DerechosPecuniariosController.PostRespuestaSolicitudDerechoPecuniario",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "Id de la solicitud",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{}"
+                    },
+                    "400": {
+                        "description": "body is empty"
+                    }
+                }
+            }
+        },
+        "/derechos_pecuniarios/solicitud": {
+            "post": {
+                "tags": [
+                    "derechos_pecuniarios"
+                ],
+                "description": "Crear una solicitud de derecho pecuniario",
+                "operationId": "DerechosPecuniariosController.PostSolicitudDerechoPecuniario",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "body Agregar Concepto content",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/{}"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{}"
+                    },
+                    "400": {
+                        "description": "body is empty"
+                    }
+                }
+            }
+        },
+        "/derechos_pecuniarios/solicitudes": {
+            "get": {
+                "tags": [
+                    "derechos_pecuniarios"
+                ],
+                "description": "Obtener todos las solicitudes de derechos pecuniarios",
+                "operationId": "DerechosPecuniariosController.GetSolicitudDerechoPecuniario",
+                "responses": {
+                    "200": {
+                        "description": "{}"
+                    },
+                    "400": {
+                        "description": "body is empty"
+                    }
+                }
+            }
+        },
+        "/derechos_pecuniarios/update/{id}": {
+            "put": {
+                "tags": [
+                    "derechos_pecuniarios"
+                ],
+                "description": "Modificar un concepto",
+                "operationId": "DerechosPecuniariosController.PutConcepto",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "body Modificar Concepto content",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/{}"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{}"
+                    },
+                    "400": {
+                        "description": "body is empty"
+                    },
+                    "403": {
+                        "description": ":id is empty"
+                    },
+                    "404": {
+                        "description": "no data found"
+                    }
+                }
+            }
+        },
+        "/derechos_pecuniarios/{id}": {
+            "get": {
+                "tags": [
+                    "derechos_pecuniarios"
+                ],
+                "description": "Consulta los derechos pecuniarias de la vigencia por id",
+                "operationId": "DerechosPecuniariosController.GetDerechosPecuniariosPorVigencia",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "Id de la vigencia correspondiente",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{}"
+                    },
+                    "403": {
+                        "description": ":id is empty"
+                    },
+                    "404": {
+                        "description": "no data found"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "derechos_pecuniarios"
+                ],
+                "description": "Inactivar Concepto y Factor por id",
+                "operationId": "DerechosPecuniariosController.DeleteConcepto",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "Id del Concepto",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{}"
+                    },
+                    "403": {
+                        "description": ":id is empty"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "{}": {
+            "title": "{}",
+            "type": "object"
+        }
+    }
+}

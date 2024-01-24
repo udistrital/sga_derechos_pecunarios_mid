@@ -15,7 +15,7 @@
     },
     "basePath": "/v1",
     "paths": {
-        "/derechos_pecuniarios/": {
+        "/derechos_pecuniarios/conceptos": {
             "post": {
                 "tags": [
                     "derechos_pecuniarios"
@@ -43,7 +43,7 @@
                 }
             }
         },
-        "/derechos_pecuniarios/actualizar_valor": {
+        "/derechos_pecuniarios/conceptos/costo": {
             "post": {
                 "tags": [
                     "derechos_pecuniarios"
@@ -71,13 +71,71 @@
                 }
             }
         },
-        "/derechos_pecuniarios/clonar": {
+        "/derechos_pecuniarios/conceptos/{id}": {
+            "put": {
+                "tags": [
+                    "derechos_pecuniarios"
+                ],
+                "description": "Modificar un concepto",
+                "operationId": "DerechosPecuniariosController.PutConcepto",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "body Modificar Concepto content",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/{}"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{}"
+                    },
+                    "400": {
+                        "description": "body is empty"
+                    },
+                    "403": {
+                        "description": ":id is empty"
+                    },
+                    "404": {
+                        "description": "no data found"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "derechos_pecuniarios"
+                ],
+                "description": "Inactivar Concepto y Factor por id",
+                "operationId": "DerechosPecuniariosController.DeleteConcepto",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "Id del Concepto",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{}"
+                    },
+                    "403": {
+                        "description": ":id is empty"
+                    }
+                }
+            }
+        },
+        "/derechos_pecuniarios/derechos": {
             "post": {
                 "tags": [
                     "derechos_pecuniarios"
                 ],
-                "description": "Clona los conceptos de la vigencia anterior en la vigencia actual",
-                "operationId": "DerechosPecuniariosController.PostClonarConceptos",
+                "description": "Generar un recibo de derecho pecuniario por parte de estudiantes",
+                "operationId": "DerechosPecuniariosController.PostGenerarrDerechoPecuniarioEstudiante",
                 "parameters": [
                     {
                         "in": "body",
@@ -95,11 +153,14 @@
                     },
                     "400": {
                         "description": "body is empty"
+                    },
+                    "404": {
+                        "description": "not found resource"
                     }
                 }
             }
         },
-        "/derechos_pecuniarios/consultar_persona/{persona_id}": {
+        "/derechos_pecuniarios/personas/{persona_id}": {
             "get": {
                 "tags": [
                     "derechos_pecuniarios"
@@ -126,7 +187,7 @@
                 }
             }
         },
-        "/derechos_pecuniarios/estado_recibos/{persona_id}/{id_periodo}": {
+        "/derechos_pecuniarios/personas/{persona_id}/periodos/{id_periodo}/estados_recibos": {
             "get": {
                 "tags": [
                     "derechos_pecuniarios"
@@ -161,54 +222,13 @@
                 }
             }
         },
-        "/derechos_pecuniarios/generar_derecho": {
-            "post": {
+        "/derechos_pecuniarios/solicitudes": {
+            "get": {
                 "tags": [
                     "derechos_pecuniarios"
                 ],
-                "description": "Generar un recibo de derecho pecuniario por parte de estudiantes",
-                "operationId": "DerechosPecuniariosController.PostGenerarrDerechoPecuniarioEstudiante",
-                "parameters": [
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "description": "body Clonar Conceptos content",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/{}"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{}"
-                    },
-                    "400": {
-                        "description": "body is empty"
-                    },
-                    "404": {
-                        "description": "not found resource"
-                    }
-                }
-            }
-        },
-        "/derechos_pecuniarios/respuesta_solicitud/{id}": {
-            "post": {
-                "tags": [
-                    "derechos_pecuniarios"
-                ],
-                "description": "Da respuesta a la solicitud de derechos pecuniarios",
-                "operationId": "DerechosPecuniariosController.PostRespuestaSolicitudDerechoPecuniario",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "id",
-                        "description": "Id de la solicitud",
-                        "required": true,
-                        "type": "integer",
-                        "format": "int64"
-                    }
-                ],
+                "description": "Obtener todos las solicitudes de derechos pecuniarios",
+                "operationId": "DerechosPecuniariosController.GetSolicitudDerechoPecuniario",
                 "responses": {
                     "200": {
                         "description": "{}"
@@ -217,9 +237,7 @@
                         "description": "body is empty"
                     }
                 }
-            }
-        },
-        "/derechos_pecuniarios/solicitud": {
+            },
             "post": {
                 "tags": [
                     "derechos_pecuniarios"
@@ -247,13 +265,23 @@
                 }
             }
         },
-        "/derechos_pecuniarios/solicitudes": {
-            "get": {
+        "/derechos_pecuniarios/solicitudes/{id}/respuesta": {
+            "post": {
                 "tags": [
                     "derechos_pecuniarios"
                 ],
-                "description": "Obtener todos las solicitudes de derechos pecuniarios",
-                "operationId": "DerechosPecuniariosController.GetSolicitudDerechoPecuniario",
+                "description": "Da respuesta a la solicitud de derechos pecuniarios",
+                "operationId": "DerechosPecuniariosController.PostRespuestaSolicitudDerechoPecuniario",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "Id de la solicitud",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "{}"
@@ -264,18 +292,18 @@
                 }
             }
         },
-        "/derechos_pecuniarios/update/{id}": {
-            "put": {
+        "/derechos_pecuniarios/vigencias/clonar_conceptos": {
+            "post": {
                 "tags": [
                     "derechos_pecuniarios"
                 ],
-                "description": "Modificar un concepto",
-                "operationId": "DerechosPecuniariosController.PutConcepto",
+                "description": "Clona los conceptos de la vigencia anterior en la vigencia actual",
+                "operationId": "DerechosPecuniariosController.PostClonarConceptos",
                 "parameters": [
                     {
                         "in": "body",
                         "name": "body",
-                        "description": "body Modificar Concepto content",
+                        "description": "body Clonar Conceptos content",
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/{}"
@@ -288,17 +316,11 @@
                     },
                     "400": {
                         "description": "body is empty"
-                    },
-                    "403": {
-                        "description": ":id is empty"
-                    },
-                    "404": {
-                        "description": "no data found"
                     }
                 }
             }
         },
-        "/derechos_pecuniarios/{id}": {
+        "/derechos_pecuniarios/vigencias/{id}": {
             "get": {
                 "tags": [
                     "derechos_pecuniarios"
@@ -324,30 +346,6 @@
                     },
                     "404": {
                         "description": "no data found"
-                    }
-                }
-            },
-            "delete": {
-                "tags": [
-                    "derechos_pecuniarios"
-                ],
-                "description": "Inactivar Concepto y Factor por id",
-                "operationId": "DerechosPecuniariosController.DeleteConcepto",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "id",
-                        "description": "Id del Concepto",
-                        "required": true,
-                        "type": "string"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{}"
-                    },
-                    "403": {
-                        "description": ":id is empty"
                     }
                 }
             }

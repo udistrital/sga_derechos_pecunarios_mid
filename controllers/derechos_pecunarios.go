@@ -40,7 +40,7 @@ func (c *DerechosPecuniariosController) URLMapping() {
 // @Param	body		body 	{}	true		"body Agregar Concepto content"
 // @Success 200 {}
 // @Failure 400 body is empty
-// @router / [post]
+// @router /conceptos [post]
 func (c *DerechosPecuniariosController) PostConcepto() {
 
 	var ConceptoFactor map[string]interface{}
@@ -133,7 +133,7 @@ func (c *DerechosPecuniariosController) PostConcepto() {
 // @Failure 400 body is empty
 // @Failure 404 no data found
 // @Failure 403 :id is empty
-// @router /update/:id [put]
+// @router /conceptos/:id [put]
 func (c *DerechosPecuniariosController) PutConcepto() {
 
 	var ConceptoFactor map[string]interface{}
@@ -199,7 +199,7 @@ func (c *DerechosPecuniariosController) PutConcepto() {
 // @Param   id      path    string  true        "Id del Concepto"
 // @Success 200 {}
 // @Failure 403 :id is empty
-// @router /:id [delete]
+// @router /conceptos/:id [delete]
 func (c *DerechosPecuniariosController) DeleteConcepto() {
 
 	var Parametro map[string]interface{}
@@ -249,7 +249,7 @@ func (c *DerechosPecuniariosController) DeleteConcepto() {
 // @Success 200 {}
 // @Failure 403 :id is empty
 // @Failure 404 no data found
-// @router /:id [get]
+// @router /vigencias/:id [get]
 func (c *DerechosPecuniariosController) GetDerechosPecuniariosPorVigencia() {
 	var conceptos []interface{}
 	var err error
@@ -277,7 +277,7 @@ func (c *DerechosPecuniariosController) GetDerechosPecuniariosPorVigencia() {
 // @Param	body		body 	{}	true		"body Clonar Conceptos content"
 // @Success 200 {}
 // @Failure 400 body is empty
-// @router /clonar [post]
+// @router /vigencias/clonar_conceptos [post]
 func (c *DerechosPecuniariosController) PostClonarConceptos() {
 	var vigencias map[string]interface{}
 	var conceptos []interface{}
@@ -374,7 +374,7 @@ func FiltrarDerechosPecuniarios(vigenciaId string) ([]interface{}, error) {
 // @Param   body        body    {}  true        "body Inhabilitar Proyecto content"
 // @Success 200 {}
 // @Failure 400 :body is empty
-// @router /actualizar_valor [post]
+// @router /conceptos/costo [post]
 func (c *DerechosPecuniariosController) PutCostoConcepto() {
 
 	var ConceptoCostoAux []map[string]interface{}
@@ -443,7 +443,7 @@ func (c *DerechosPecuniariosController) PutCostoConcepto() {
 // @Success 200 {}
 // @Failure 404 not found resource
 // @Failure 400 body is empty
-// @router /generar_derecho [post]
+// @router /derechos [post]
 func (c *DerechosPecuniariosController) PostGenerarDerechoPecuniarioEstudiante() {
 	var SolicitudDerechoPecuniario map[string]interface{}
 	var TipoParametro string
@@ -583,7 +583,7 @@ func (c *DerechosPecuniariosController) PostGenerarDerechoPecuniarioEstudiante()
 // @Param	id_periodo	path	int	true	"Id del ultimo periodo"
 // @Success 200 {}
 // @Failure 404 not found resource
-// @router /estado_recibos/:persona_id/:id_periodo [get]
+// @router /personas/:persona_id/periodos/:id_periodo/estados_recibos [get]
 func (c *DerechosPecuniariosController) GetEstadoRecibo() {
 
 	persona_id := c.Ctx.Input.Param(":persona_id")
@@ -797,7 +797,7 @@ func (c *DerechosPecuniariosController) GetEstadoRecibo() {
 // @Param	persona_id	path	int	true	"Id del tercero"
 // @Success 200 {}
 // @Failure 404 not found resource
-// @router /consultar_persona/:persona_id [get]
+// @router /personas/:persona_id [get]
 func (c *DerechosPecuniariosController) GetConsultarPersona() {
 	//Id del tercero
 	idStr := c.Ctx.Input.Param(":persona_id")
@@ -881,7 +881,7 @@ func (c *DerechosPecuniariosController) GetConsultarPersona() {
 // @Param	body		body 	{}	true		"body Agregar Concepto content"
 // @Success 200 {}
 // @Failure 400 body is empty
-// @router /solicitud [post]
+// @router /solicitudes [post]
 func (c *DerechosPecuniariosController) PostSolicitudDerechoPecuniario() {
 
 	var Referencia string
@@ -1142,7 +1142,7 @@ func (c *DerechosPecuniariosController) GetSolicitudDerechoPecuniario() {
 // @Param	id	path	int	true	"Id de la solicitud"
 // @Success 200 {}
 // @Failure 400 body is empty
-// @router /respuesta_solicitud/:id [post]
+// @router /solicitudes/:id/respuesta [post]
 func (c *DerechosPecuniariosController) PostRespuestaSolicitudDerechoPecuniario() {
 
 	id_solicitud := c.Ctx.Input.Param(":id")

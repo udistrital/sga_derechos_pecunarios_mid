@@ -12,7 +12,9 @@ import (
 	"github.com/astaxie/beego/httplib"
 	"github.com/astaxie/beego/logs"
 	"github.com/udistrital/sga_mid_derechos_pecunarios/models"
+	"github.com/udistrital/utils_oas/errorhandler"
 	"github.com/udistrital/utils_oas/request"
+	"github.com/udistrital/utils_oas/requestresponse"
 )
 
 type DerechosPecuniariosController struct {
@@ -40,8 +42,9 @@ func (c *DerechosPecuniariosController) URLMapping() {
 // @Param	body		body 	{}	true		"body Agregar Concepto content"
 // @Success 200 {}
 // @Failure 400 body is empty
-// @router / [post]
+// @router /conceptos [post]
 func (c *DerechosPecuniariosController) PostConcepto() {
+	defer errorhandler.HandlePanic(&c.Controller)
 
 	var ConceptoFactor map[string]interface{}
 	var AuxConceptoPost map[string]interface{}
@@ -60,14 +63,18 @@ func (c *DerechosPecuniariosController) PostConcepto() {
 
 		if errConcepto == nil && fmt.Sprintf("%v", ConceptoPost["System"]) != "map[]" && ConceptoPost["Id"] != nil {
 			if ConceptoPost["Status"] != 400 {
-				c.Data["json"] = ConceptoPost
+				c.Ctx.Output.SetStatus(200)
+				c.Data["json"] = requestresponse.APIResponseDTO(true, 200, ConceptoPost)
 			} else {
 				logs.Error(errConcepto)
-				c.Data["json"] = map[string]interface{}{"Code": "400", "Body": errConcepto.Error(), "Type": "error"}
+				c.Ctx.Output.SetStatus(400)
+				c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil)
 				c.Data["system"] = ConceptoPost
 			}
 		} else {
 			logs.Error(errConcepto)
+			c.Ctx.Output.SetStatus(400)
+			c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil)
 			c.Data["system"] = ConceptoPost
 		}
 
@@ -106,20 +113,25 @@ func (c *DerechosPecuniariosController) PostConcepto() {
 							"Valor": ValorJson["NumFactor"],
 						},
 					}
-
-					c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Request successful", "Data": Response}
+					c.Ctx.Output.SetStatus(200)
+					c.Data["json"] = requestresponse.APIResponseDTO(true, 200, Response)
 				}
 			} else {
 				var resultado2 map[string]interface{}
 				request.SendJson(fmt.Sprintf("http://"+beego.AppConfig.String("ParametroService")+"parametro/%.f", ConceptoPost["Id"]), "DELETE", &resultado2, nil)
 				logs.Error(errFactor)
-				c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": FactorPost, "Data": nil}
+				c.Ctx.Output.SetStatus(400)
+				c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil)
 			}
 		} else {
 			logs.Error(errFactor)
 			c.Data["system"] = FactorPost
-			c.Data["json"] = map[string]interface{}{"Success": false, "Status": "404", "Message": FactorPost, "Data": nil}
+			c.Ctx.Output.SetStatus(404)
+			c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil)
 		}
+	} else {
+		c.Ctx.Output.SetStatus(404)
+		c.Data["json"] = requestresponse.APIResponseDTO(false, 404, err.Error())
 	}
 
 	c.ServeJSON()
@@ -133,8 +145,9 @@ func (c *DerechosPecuniariosController) PostConcepto() {
 // @Failure 400 body is empty
 // @Failure 404 no data found
 // @Failure 403 :id is empty
-// @router /update/:id [put]
+// @router /conceptos/:id [put]
 func (c *DerechosPecuniariosController) PutConcepto() {
+	defer errorhandler.HandlePanic(&c.Controller)
 
 	var ConceptoFactor map[string]interface{}
 	var AuxConceptoPut map[string]interface{}
@@ -158,7 +171,8 @@ func (c *DerechosPecuniariosController) PutConcepto() {
 					errFactor := request.SendJson("http://"+beego.AppConfig.String("ParametroService")+"parametro_periodo/"+fmt.Sprintf("%.f", Data["Id"].(float64)), "PUT", &AuxFactorPut, Data)
 					if errFactor != nil {
 						logs.Error(errFactor)
-						c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": errFactor.Error(), "Data": nil}
+						c.Ctx.Output.SetStatus(400)
+						c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errFactor.Error())
 					}
 					Concepto := ConceptoFactor["Concepto"].(map[string]interface{})
 					ConceptoPut["Nombre"] = Concepto["Nombre"]
@@ -166,28 +180,33 @@ func (c *DerechosPecuniariosController) PutConcepto() {
 					errPut := request.SendJson("http://"+beego.AppConfig.String("ParametroService")+"parametro/"+idStr, "PUT", &AuxConceptoPut, ConceptoPut)
 					if errPut != nil {
 						logs.Error(errPut)
-						c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": errPut.Error(), "Data": nil}
+						c.Ctx.Output.SetStatus(400)
+						c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errPut.Error())
 					} else {
 						response := map[string]interface{}{
 							"Concepto": AuxConceptoPut,
 							"Factor":   AuxFactorPut,
 						}
 						c.Ctx.Output.SetStatus(200)
-						c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Query successful", "Data": response}
+						c.Data["json"] = requestresponse.APIResponseDTO(true, 200, response)
 					}
 				} else {
-					c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": "Body is empty", "Data": nil}
+					c.Ctx.Output.SetStatus(400)
+					c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, "Body is empty")
 				}
 			} else {
 				logs.Error(err)
-				c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": err.Error(), "Data": nil}
+				c.Ctx.Output.SetStatus(400)
+				c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, err.Error())
 			}
 		} else {
-			c.Data["json"] = map[string]interface{}{"Success": false, "Status": "404", "Message": "No data found", "Data": nil}
+			c.Ctx.Output.SetStatus(404)
+			c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil)
 		}
 	} else {
 		logs.Error(err)
-		c.Data["json"] = map[string]interface{}{"Success": false, "Status": "404", "Message": err, "Data": nil}
+		c.Ctx.Output.SetStatus(404)
+		c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, err.Error())
 	}
 
 	c.ServeJSON()
@@ -199,8 +218,9 @@ func (c *DerechosPecuniariosController) PutConcepto() {
 // @Param   id      path    string  true        "Id del Concepto"
 // @Success 200 {}
 // @Failure 403 :id is empty
-// @router /:id [delete]
+// @router /conceptos/:id [delete]
 func (c *DerechosPecuniariosController) DeleteConcepto() {
+	defer errorhandler.HandlePanic(&c.Controller)
 
 	var Parametro map[string]interface{}
 	var AuxFactorPut map[string]interface{}
@@ -224,19 +244,22 @@ func (c *DerechosPecuniariosController) DeleteConcepto() {
 					"Concepto": AuxConceptoPut,
 					"Factor":   AuxFactorPut,
 				}
-
-				c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Query successful", "Data": response}
+				c.Ctx.Output.SetStatus(200)
+				c.Data["json"] = requestresponse.APIResponseDTO(true, 200, response)
 			} else {
 				logs.Error(errConcepto)
-				c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": errConcepto.Error(), "Data": nil}
+				c.Ctx.Output.SetStatus(400)
+				c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errConcepto.Error())
 			}
 		} else {
 			logs.Error(errFactor)
-			c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": errFactor.Error(), "Data": nil}
+			c.Ctx.Output.SetStatus(400)
+			c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errFactor.Error())
 		}
 	} else {
 		logs.Error(err)
-		c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": err.Error(), "Data": nil}
+		c.Ctx.Output.SetStatus(400)
+		c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil)
 	}
 
 	c.ServeJSON()
@@ -249,8 +272,10 @@ func (c *DerechosPecuniariosController) DeleteConcepto() {
 // @Success 200 {}
 // @Failure 403 :id is empty
 // @Failure 404 no data found
-// @router /:id [get]
+// @router /vigencias/:id [get]
 func (c *DerechosPecuniariosController) GetDerechosPecuniariosPorVigencia() {
+	defer errorhandler.HandlePanic(&c.Controller)
+
 	var conceptos []interface{}
 	var err error
 	idStr := c.Ctx.Input.Param(":id")
@@ -259,14 +284,15 @@ func (c *DerechosPecuniariosController) GetDerechosPecuniariosPorVigencia() {
 	if err == nil {
 		if conceptos != nil {
 			c.Ctx.Output.SetStatus(200)
-			c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Query successful", "Data": conceptos}
+			c.Data["json"] = requestresponse.APIResponseDTO(true, 200, conceptos)
 		} else {
-			c.Ctx.Output.SetStatus(200)
-			c.Data["json"] = map[string]interface{}{"Success": false, "Status": "404", "Message": "No data found", "Data": []map[string]interface{}{}}
+			c.Ctx.Output.SetStatus(404)
+			c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil)
 		}
 	} else {
 		logs.Error(err)
-		c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": err.Error(), "Data": nil}
+		c.Ctx.Output.SetStatus(400)
+		c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, err.Error())
 	}
 	c.ServeJSON()
 }
@@ -277,8 +303,10 @@ func (c *DerechosPecuniariosController) GetDerechosPecuniariosPorVigencia() {
 // @Param	body		body 	{}	true		"body Clonar Conceptos content"
 // @Success 200 {}
 // @Failure 400 body is empty
-// @router /clonar [post]
+// @router /vigencias/clonar_conceptos [post]
 func (c *DerechosPecuniariosController) PostClonarConceptos() {
+	defer errorhandler.HandlePanic(&c.Controller)
+
 	var vigencias map[string]interface{}
 	var conceptos []interface{}
 	var NuevoConceptoPost map[string]interface{}
@@ -317,26 +345,31 @@ func (c *DerechosPecuniariosController) PostClonarConceptos() {
 						errorGetAll = true
 						logs.Error(errNuevoFactor)
 						request.SendJson(fmt.Sprintf("http://"+beego.AppConfig.String("ParametroService")+"parametro/%.f", NuevoConceptoPost["Id"]), "DELETE", &resDelete, nil)
-						c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": errNuevoFactor.Error(), "Data": nil}
+						c.Ctx.Output.SetStatus(400)
+						c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errNuevoFactor.Error())
 					}
 				} else {
 					errorGetAll = true
 					logs.Error(errNuevoConcepto)
-					c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": errNuevoConcepto.Error(), "Data": nil}
+					c.Ctx.Output.SetStatus(400)
+					c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errNuevoConcepto.Error())
 				}
 			}
 		} else {
 			errorGetAll = true
 			logs.Error(errorConceptos)
-			c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": errorConceptos.Error(), "Data": nil}
+			c.Ctx.Output.SetStatus(400)
+			c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errorConceptos.Error())
 		}
 	} else {
 		errorGetAll = true
-		c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": errorVigencias.Error(), "Data": nil}
+		c.Ctx.Output.SetStatus(400)
+		c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errorVigencias.Error())
 	}
 
 	if !errorGetAll {
-		c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Request successful", "Data": NuevoFactorPost}
+		c.Ctx.Output.SetStatus(200)
+		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, NuevoFactorPost)
 	}
 
 	c.ServeJSON()
@@ -374,8 +407,9 @@ func FiltrarDerechosPecuniarios(vigenciaId string) ([]interface{}, error) {
 // @Param   body        body    {}  true        "body Inhabilitar Proyecto content"
 // @Success 200 {}
 // @Failure 400 :body is empty
-// @router /actualizar_valor [post]
+// @router /conceptos/costo [post]
 func (c *DerechosPecuniariosController) PutCostoConcepto() {
+	defer errorhandler.HandlePanic(&c.Controller)
 
 	var ConceptoCostoAux []map[string]interface{}
 	var Factor map[string]interface{}
@@ -402,35 +436,42 @@ func (c *DerechosPecuniariosController) PutCostoConcepto() {
 						if errPut == nil {
 							if FactorPut == nil {
 								errorGetAll = true
-								c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": FactorPut, "Data": nil}
+								c.Ctx.Output.SetStatus(400)
+								c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil)
 							}
 						} else {
 							errorGetAll = true
 							logs.Error(errPut)
-							c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": errPut.Error(), "Data": nil}
+							c.Ctx.Output.SetStatus(400)
+							c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errPut.Error())
 						}
 					} else {
 						errorGetAll = true
 						logs.Error(errFactor)
-						c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": errFactor.Error(), "Data": nil}
+						c.Ctx.Output.SetStatus(400)
+						c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errFactor.Error())
 					}
 				} else {
 					errorGetAll = true
 					logs.Error(errFactor)
-					c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": errFactor.Error(), "Data": nil}
+					c.Ctx.Output.SetStatus(400)
+					c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errFactor.Error())
 				}
 			}
 		} else {
 			errorGetAll = true
-			c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": "Body is empty", "Data": nil}
+			c.Ctx.Output.SetStatus(400)
+			c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, "Body is empty")
 		}
 	} else {
 		errorGetAll = true
-		c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": err.Error(), "Data": nil}
+		c.Ctx.Output.SetStatus(400)
+		c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, err.Error())
 	}
 
 	if !errorGetAll {
-		c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Request successful", "Data": FactorPut}
+		c.Ctx.Output.SetStatus(200)
+		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, FactorPut)
 	}
 
 	c.ServeJSON()
@@ -443,8 +484,10 @@ func (c *DerechosPecuniariosController) PutCostoConcepto() {
 // @Success 200 {}
 // @Failure 404 not found resource
 // @Failure 400 body is empty
-// @router /generar_derecho [post]
+// @router /derechos [post]
 func (c *DerechosPecuniariosController) PostGenerarDerechoPecuniarioEstudiante() {
+	defer errorhandler.HandlePanic(&c.Controller)
+
 	var SolicitudDerechoPecuniario map[string]interface{}
 	var TipoParametro string
 	var Derecho map[string]interface{}
@@ -538,39 +581,46 @@ func (c *DerechosPecuniariosController) PostGenerarDerechoPecuniarioEstudiante()
 							errComplementarioPost := request.SendJson("http://"+beego.AppConfig.String("TercerosService")+"info_complementaria_tercero", "POST", &complementario, derechoPecuniarioSolicitado)
 							if errComplementarioPost != nil {
 								logs.Error(errComplementarioPost)
-								c.Data["json"] = map[string]interface{}{"Success": true, "Status": "204", "Message": errComplementarioPost.Error(), "Data": nil}
+								c.Ctx.Output.SetStatus(204)
+								c.Data["json"] = requestresponse.APIResponseDTO(true, 204, nil, errComplementarioPost.Error())
 							}
 						}
 
 					} else {
 						errorGetAll = true
 						logs.Error(errJson)
-						c.Data["json"] = map[string]interface{}{"Success": false, "Status": "404", "Message": errJson.Error(), "Data": nil}
+						c.Ctx.Output.SetStatus(404)
+						c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, errJson.Error())
 					}
 
 				} else {
 					errorGetAll = true
 					logs.Error(errCodigo)
-					c.Data["json"] = map[string]interface{}{"Success": false, "Status": "404", "Message": errCodigo.Error(), "Data": nil}
+					c.Ctx.Output.SetStatus(404)
+					c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, errCodigo.Error())
 				}
 			} else {
 				errorGetAll = true
 				logs.Error(errParam)
-				c.Data["json"] = map[string]interface{}{"Success": false, "Status": "404", "Message": errParam.Error(), "Data": nil}
+				c.Ctx.Output.SetStatus(404)
+				c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, errParam.Error())
 			}
 		} else {
 			errorGetAll = true
 			logs.Error(err)
-			c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": "Body is empty", "Data": nil}
+			c.Ctx.Output.SetStatus(400)
+			c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, "Body is empty")
 		}
 	} else {
 		errorGetAll = true
 		logs.Error(err)
-		c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": err.Error(), "Data": nil}
+		c.Ctx.Output.SetStatus(400)
+		c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, err.Error())
 	}
 
 	if !errorGetAll {
-		c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Request successful", "Data": complementario}
+		c.Ctx.Output.SetStatus(200)
+		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, complementario)
 	}
 
 	c.ServeJSON()
@@ -583,8 +633,9 @@ func (c *DerechosPecuniariosController) PostGenerarDerechoPecuniarioEstudiante()
 // @Param	id_periodo	path	int	true	"Id del ultimo periodo"
 // @Success 200 {}
 // @Failure 404 not found resource
-// @router /estado_recibos/:persona_id/:id_periodo [get]
+// @router /personas/:persona_id/periodos/:id_periodo/estados_recibos [get]
 func (c *DerechosPecuniariosController) GetEstadoRecibo() {
+	defer errorhandler.HandlePanic(&c.Controller)
 
 	persona_id := c.Ctx.Input.Param(":persona_id")
 	id_periodo := c.Ctx.Input.Param(":id_periodo")
@@ -599,7 +650,6 @@ func (c *DerechosPecuniariosController) GetEstadoRecibo() {
 	var Estado string
 	var PeriodoConsulta string
 	var errorGetAll bool
-	alertas := []interface{}{}
 
 	errPeriodo := request.GetJson("http://"+beego.AppConfig.String("ParametroService")+"periodo?query=id:"+id_periodo, &Periodo)
 	if errPeriodo == nil {
@@ -675,14 +725,14 @@ func (c *DerechosPecuniariosController) GetEstadoRecibo() {
 											NombreConcepto = fmt.Sprint(Derecho["Data"].([]interface{})[0].(map[string]interface{})["ParametroId"].(map[string]interface{})["Nombre"])
 										} else {
 											errorGetAll = true
-											alertas = append(alertas, "No data found")
-											c.Data["json"] = map[string]interface{}{"Success": false, "Status": "404", "Message": alertas, "Data": nil}
+											c.Ctx.Output.SetStatus(404)
+											c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil)
 										}
 
 									} else {
 										errorGetAll = true
-										alertas = append(alertas, "No data found")
-										c.Data["json"] = map[string]interface{}{"Success": false, "Status": "404", "Message": alertas, "Data": nil}
+										c.Ctx.Output.SetStatus(404)
+										c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil)
 									}
 
 									valorPagado := ""
@@ -709,7 +759,8 @@ func (c *DerechosPecuniariosController) GetEstadoRecibo() {
 												}
 											} else {
 												errorGetAll = true
-												c.Data["json"] = map[string]interface{}{"Success": false, "Status": "404", "Message": "Error service GetAll: No data found", "Data": nil}
+												c.Ctx.Output.SetStatus(404)
+												c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, "Error service GetAll: No data found")
 											}
 										}
 
@@ -757,14 +808,14 @@ func (c *DerechosPecuniariosController) GetEstadoRecibo() {
 										errorGetAll = false
 									} else {
 										errorGetAll = true
-										alertas = []interface{}{"No data found"}
-										c.Data["json"] = map[string]interface{}{"Success": false, "Status": "404", "Message": alertas, "Data": nil}
+										c.Ctx.Output.SetStatus(404)
+										c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil)
 									}
 								}
 							} else {
 								errorGetAll = true
-								alertas = append(alertas, errRecibo.Error())
-								c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": alertas, "Data": nil}
+								c.Ctx.Output.SetStatus(400)
+								c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errRecibo.Error())
 							}
 						}
 						if fmt.Sprintf("%v", resultadoAux[i]) != "map[]" {
@@ -774,18 +825,20 @@ func (c *DerechosPecuniariosController) GetEstadoRecibo() {
 					}
 				} else {
 					errorGetAll = true
-					alertas = append(alertas, "No data found")
-					c.Data["json"] = map[string]interface{}{"Success": false, "Status": "404", "Message": alertas, "Data": nil}
+					c.Ctx.Output.SetStatus(404)
+					c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil)
 				}
 			} else {
 				errorGetAll = true
-				c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": errRecibo.Error(), "Data": nil}
+				c.Ctx.Output.SetStatus(400)
+				c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errRecibo.Error())
 			}
 		}
 	}
 
 	if !errorGetAll {
-		c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Request successful", "Data": resultado}
+		c.Ctx.Output.SetStatus(200)
+		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, resultado)
 	}
 
 	c.ServeJSON()
@@ -797,8 +850,10 @@ func (c *DerechosPecuniariosController) GetEstadoRecibo() {
 // @Param	persona_id	path	int	true	"Id del tercero"
 // @Success 200 {}
 // @Failure 404 not found resource
-// @router /consultar_persona/:persona_id [get]
+// @router /personas/:persona_id [get]
 func (c *DerechosPecuniariosController) GetConsultarPersona() {
+	defer errorhandler.HandlePanic(&c.Controller)
+
 	//Id del tercero
 	idStr := c.Ctx.Input.Param(":persona_id")
 	//resultado informacion basica persona
@@ -841,35 +896,42 @@ func (c *DerechosPecuniariosController) GetConsultarPersona() {
 				} else {
 					if identificacion[0]["Message"] == "Not found resource" {
 						errorGetAll = true
-						c.Data["json"] = map[string]interface{}{"Success": false, "Status": "404", "Message": "Not found resource", "Data": nil}
+						c.Ctx.Output.SetStatus(404)
+						c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil)
 					} else {
 						logs.Error(identificacion)
 						errorGetAll = true
-						c.Data["json"] = map[string]interface{}{"Success": false, "Status": "404", "Message": errIdentificacion.Error(), "Data": nil}
+						c.Ctx.Output.SetStatus(404)
+						c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, errIdentificacion.Error())
 					}
 				}
 			} else {
 				logs.Error(identificacion)
 				errorGetAll = true
-				c.Data["json"] = map[string]interface{}{"Success": false, "Status": "404", "Message": errIdentificacion.Error(), "Data": nil}
+				c.Ctx.Output.SetStatus(404)
+				c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, errIdentificacion.Error())
 			}
 		} else {
 			if persona[0]["Message"] == "Not found resource" {
-				c.Data["json"] = map[string]interface{}{"Success": false, "Status": "404", "Message": "Not found resource", "Data": nil}
+				c.Ctx.Output.SetStatus(404)
+				c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, "Not found resource")
 			} else {
 				logs.Error(persona)
 				errorGetAll = true
-				c.Data["json"] = map[string]interface{}{"Success": false, "Status": "404", "Message": "Not found resource", "Data": nil}
+				c.Ctx.Output.SetStatus(404)
+				c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, "Not found resource")
 			}
 		}
 	} else {
 		logs.Error(persona)
 		errorGetAll = true
-		c.Data["json"] = map[string]interface{}{"Success": false, "Status": "404", "Message": "Not found resource", "Data": nil}
+		c.Ctx.Output.SetStatus(404)
+		c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, "Not found resource")
 	}
 
 	if !errorGetAll {
-		c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Request successful", "Data": resultado}
+		c.Ctx.Output.SetStatus(200)
+		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, resultado)
 	}
 
 	c.ServeJSON()
@@ -881,8 +943,9 @@ func (c *DerechosPecuniariosController) GetConsultarPersona() {
 // @Param	body		body 	{}	true		"body Agregar Concepto content"
 // @Success 200 {}
 // @Failure 400 body is empty
-// @router /solicitud [post]
+// @router /solicitudes [post]
 func (c *DerechosPecuniariosController) PostSolicitudDerechoPecuniario() {
+	defer errorhandler.HandlePanic(&c.Controller)
 
 	var Referencia string
 	var resDocs []interface{}
@@ -1010,41 +1073,49 @@ func (c *DerechosPecuniariosController) PostSolicitudDerechoPecuniario() {
 
 							} else {
 								errorGetAll = true
-								c.Data["json"] = map[string]interface{}{"Success": false, "Status": "404", "Message": "No data found", "Data": nil}
+								c.Ctx.Output.SetStatus(404)
+								c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil)
 							}
 						} else {
 							var resultado2 map[string]interface{}
 							request.SendJson("http://"+beego.AppConfig.String("SolicitudDocenteService")+"solicitud/"+fmt.Sprintf("%v", IdSolicitud), "DELETE", &resultado2, nil)
 							request.SendJson("http://"+beego.AppConfig.String("SolicitudDocenteService")+"solicitante/"+fmt.Sprintf("%v", SolicitantePost["Id"]), "DELETE", &resultado2, nil)
 							errorGetAll = true
-							c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": errSolicitante.Error(), "Data": nil}
+							c.Ctx.Output.SetStatus(400)
+							c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errSolicitante.Error())
 						}
 					} else {
 						errorGetAll = true
-						c.Data["json"] = map[string]interface{}{"Success": false, "Status": "404", "Message": "No data found", "Data": nil}
+						c.Ctx.Output.SetStatus(404)
+						c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil)
 					}
 				} else {
 					//Se elimina el registro de solicitud si no se puede hacer el POST a la tabla solicitante
 					var resultado2 map[string]interface{}
 					request.SendJson("http://"+beego.AppConfig.String("SolicitudDocenteService")+"solicitud/"+fmt.Sprintf("%v", IdSolicitud), "DELETE", &resultado2, nil)
 					errorGetAll = true
-					c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": errSolicitante.Error(), "Data": nil}
+					c.Ctx.Output.SetStatus(400)
+					c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errSolicitante.Error())
 				}
 			} else {
 				errorGetAll = true
-				c.Data["json"] = map[string]interface{}{"Success": false, "Status": "404", "Message": "No data found", "Data": nil}
+				c.Ctx.Output.SetStatus(404)
+				c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil)
 			}
 		} else {
 			errorGetAll = true
-			c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": errSolicitud.Error(), "Data": nil}
+			c.Ctx.Output.SetStatus(400)
+			c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errSolicitud.Error())
 		}
 	} else {
 		errorGetAll = true
-		c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": err.Error(), "Data": nil}
+		c.Ctx.Output.SetStatus(400)
+		c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, err.Error())
 	}
 
 	if !errorGetAll {
-		c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Request successful", "Data": resultado}
+		c.Ctx.Output.SetStatus(200)
+		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, resultado)
 	}
 
 	c.ServeJSON()
@@ -1057,6 +1128,7 @@ func (c *DerechosPecuniariosController) PostSolicitudDerechoPecuniario() {
 // @Failure 400 body is empty
 // @router /solicitudes [get]
 func (c *DerechosPecuniariosController) GetSolicitudDerechoPecuniario() {
+	defer errorhandler.HandlePanic(&c.Controller)
 
 	var Solicitudes []map[string]interface{}
 	var DatosIdentificacion []map[string]interface{}
@@ -1109,28 +1181,34 @@ func (c *DerechosPecuniariosController) GetSolicitudDerechoPecuniario() {
 							resultado = append(resultado, resultadoAux)
 						} else {
 							errorGetAll = true
-							c.Data["json"] = map[string]interface{}{"Success": false, "Status": "404", "Message": "Error service GetAll: No data found", "Data": nil}
+							c.Ctx.Output.SetStatus(404)
+							c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, "Error service GetAll: No data found")
 						}
 					} else {
 						errorGetAll = true
-						c.Data["json"] = map[string]interface{}{"Success": false, "Status": "404", "Message": "Error service GetAll: No data found", "Data": nil}
+						c.Ctx.Output.SetStatus(404)
+						c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, "Error service GetAll: No data foundaaaaa")
 					}
 				} else {
 					errorGetAll = true
-					c.Data["json"] = map[string]interface{}{"Success": false, "Status": "404", "Message": "Error service GetAll: No data found", "Data": nil}
+					c.Ctx.Output.SetStatus(404)
+					c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, "Error service GetAll: No data found")
 				}
 			}
 		} else {
 			errorGetAll = true
-			c.Data["json"] = map[string]interface{}{"Success": false, "Status": "404", "Message": "Error service GetAll: No data found", "Data": nil}
+			c.Ctx.Output.SetStatus(404)
+			c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, "Error service GetAll: No data found")
 		}
 	} else {
 		errorGetAll = true
-		c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": errSolicitudes.Error(), "Data": nil}
+		c.Ctx.Output.SetStatus(400)
+		c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errSolicitudes.Error())
 	}
 
 	if !errorGetAll {
-		c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Request successful", "Data": resultado}
+		c.Ctx.Output.SetStatus(200)
+		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, resultado)
 	}
 
 	c.ServeJSON()
@@ -1142,8 +1220,9 @@ func (c *DerechosPecuniariosController) GetSolicitudDerechoPecuniario() {
 // @Param	id	path	int	true	"Id de la solicitud"
 // @Success 200 {}
 // @Failure 400 body is empty
-// @router /respuesta_solicitud/:id [post]
+// @router /solicitudes/:id/respuesta [post]
 func (c *DerechosPecuniariosController) PostRespuestaSolicitudDerechoPecuniario() {
+	defer errorhandler.HandlePanic(&c.Controller)
 
 	id_solicitud := c.Ctx.Input.Param(":id")
 	var RespuestaSolicitud map[string]interface{}
@@ -1241,54 +1320,65 @@ func (c *DerechosPecuniariosController) PostRespuestaSolicitudDerechoPecuniario(
 									if errPutEstado == nil {
 										if SolicitudPut["Status"] == "400" {
 											errorGetAll = true
-											c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": SolicitudPut["Message"], "Data": nil}
+											c.Ctx.Output.SetStatus(400)
+											c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil)
 										}
 									} else {
 										errorGetAll = true
-										c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": errPutEstado.Error(), "Data": nil}
+										c.Ctx.Output.SetStatus(400)
+										c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errPutEstado.Error())
 									}
 
 								} else {
 									errorGetAll = true
-									c.Data["json"] = map[string]interface{}{"Success": false, "Status": "404", "Message": "No data found", "Data": nil}
+									c.Ctx.Output.SetStatus(404)
+									c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil)
 								}
 							} else {
 								errorGetAll = true
-								c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": errSolicitudEvolucionEstado.Error(), "Data": nil}
+								c.Ctx.Output.SetStatus(400)
+								c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errSolicitudEvolucionEstado.Error())
 							}
 
 						} else {
 							errorGetAll = true
-							c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": errSolicitudEvolucionEstado.Error(), "Data": nil}
+							c.Ctx.Output.SetStatus(400)
+							c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errSolicitudEvolucionEstado.Error())
 						}
 
 					} else {
 						errorGetAll = true
-						c.Data["json"] = map[string]interface{}{"Success": false, "Status": "404", "Message": "No data found", "Data": nil}
+						c.Ctx.Output.SetStatus(404)
+						c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil)
 					}
 
 				} else {
 					errorGetAll = true
-					c.Data["json"] = map[string]interface{}{"Success": false, "Status": "404", "Message": "Error service GetAll: No data found", "Data": nil}
+					c.Ctx.Output.SetStatus(404)
+					c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil)
 				}
 
 			} else {
 				errorGetAll = true
-				c.Data["json"] = map[string]interface{}{"Success": false, "Status": "404", "Message": "Error service GetAll: No data found", "Data": nil}
+				c.Ctx.Output.SetStatus(404)
+				c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, "Error service GetAll: No data found")
 			}
 
 		} else {
 			errorGetAll = true
-			c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": errSolicitud.Error(), "Data": nil}
+			c.Ctx.Output.SetStatus(400)
+			c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errSolicitud.Error())
 		}
 
 	} else {
 		errorGetAll = true
-		c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": err.Error(), "Data": nil}
+		c.Ctx.Output.SetStatus(400)
+		c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, err.Error())
 	}
 
 	if !errorGetAll {
-		c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Request successful", "Data": SolicitudPut}
+		c.Ctx.Output.SetStatus(200)
+		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, SolicitudPut)
 	}
 
 	c.ServeJSON()

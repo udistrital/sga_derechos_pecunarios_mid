@@ -12,8 +12,8 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/httplib"
 	"github.com/astaxie/beego/logs"
-	"github.com/udistrital/sga_mid_derechos_pecunarios/helpers"
-	"github.com/udistrital/sga_mid_derechos_pecunarios/models"
+	"github.com/udistrital/sga_derecho_pecunario_mid/helpers"
+	"github.com/udistrital/sga_derecho_pecunario_mid/models"
 	"github.com/udistrital/utils_oas/request"
 )
 

@@ -35,12 +35,10 @@ func PostConcepto(data []byte) (interface{}, error) {
 		IdConcepto = ConceptoPost["Id"]
 
 		if errConcepto == nil && fmt.Sprintf("%v", ConceptoPost["System"]) != "map[]" && ConceptoPost["Id"] != nil {
-			if ConceptoPost["Status"] != 400 {
-				return ConceptoPost, nil
-			} else {
+			if ConceptoPost["Status"] == 400 {
 				logs.Error(errConcepto)
 				exito = false
-			}
+			} 
 		} else {
 			logs.Error(errConcepto)
 			exito = false

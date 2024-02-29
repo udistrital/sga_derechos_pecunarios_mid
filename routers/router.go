@@ -9,7 +9,7 @@ package routers
 
 import (
 	"github.com/astaxie/beego"
-	"github.com/udistrital/sga_mid_derechos_pecunarios/controllers"
+	"github.com/udistrital/sga_derecho_pecunario_mid/controllers"
 	"github.com/udistrital/utils_oas/errorhandler"
 )
 

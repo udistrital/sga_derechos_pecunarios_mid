@@ -8,12 +8,15 @@
 package routers
 
 import (
-	"github.com/udistrital/sga_mid_derechos_pecunarios/controllers"
-
 	"github.com/astaxie/beego"
+	"github.com/udistrital/sga_derecho_pecunario_mid/controllers"
+	"github.com/udistrital/utils_oas/errorhandler"
 )
 
 func init() {
+
+	beego.ErrorController(&errorhandler.ErrorHandlerController{})
+
 	ns := beego.NewNamespace("/v1",
 		beego.NSNamespace("/derechos_pecuniarios",
 			beego.NSInclude(

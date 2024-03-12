@@ -136,7 +136,7 @@ func (c *DerechosPecuniariosController) GetDerechosPecuniariosPorVigencia() {
 // @Param	body		body 	{}	true		"body Clonar Conceptos content"
 // @Success 200 {}
 // @Failure 400 body is empty
-// @router /vigencias/clonar_conceptos [post]
+// @router /vigencias/clonar-conceptos [post]
 func (c *DerechosPecuniariosController) PostClonarConceptos() {
 	defer errorhandler.HandlePanic(&c.Controller)
 
@@ -161,7 +161,7 @@ func (c *DerechosPecuniariosController) PostClonarConceptos() {
 // @Param   body        body    {}  true        "body Inhabilitar Proyecto content"
 // @Success 200 {}
 // @Failure 400 :body is empty
-// @router /conceptos/costo [post]
+// @router /conceptos/costos [post]
 func (c *DerechosPecuniariosController) PutCostoConcepto() {
 	defer errorhandler.HandlePanic(&c.Controller)
 
@@ -210,15 +210,15 @@ func (c *DerechosPecuniariosController) PostGenerarDerechoPecuniarioEstudiante()
 // @Title GetEstadoRecibo
 // @Description consultar los estados de todos los recibos de derechos pecuniarios generados por el tercero
 // @Param	persona_id	path	int	true	"Id del tercero"
-// @Param	id_periodo	path	int	true	"Id del ultimo periodo"
+// @Param	periodo_id	path	int	true	"Id del ultimo periodo"
 // @Success 200 {}
 // @Failure 404 not found resource
-// @router /personas/:persona_id/periodos/:id_periodo/estados_recibos [get]
+// @router /personas/:persona_id/periodos/:periodo_id/recibos [get]
 func (c *DerechosPecuniariosController) GetEstadoRecibo() {
 	defer errorhandler.HandlePanic(&c.Controller)
 
 	idPersona := c.Ctx.Input.Param(":persona_id")
-	idPeriodo := c.Ctx.Input.Param(":id_periodo")
+	idPeriodo := c.Ctx.Input.Param(":periodo_id")
 
 	resultado, err := services.GetEstadoRecibo(idPersona, idPeriodo)
 

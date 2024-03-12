@@ -11,10 +11,10 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
 basePath: /v1
 paths:
-  /derechos_pecuniarios/conceptos:
+  /derechos-pecuniarios/conceptos:
     post:
       tags:
-      - derechos_pecuniarios
+      - derechos-pecuniarios
       description: Agregar un concepto
       operationId: DerechosPecuniariosController.PostConcepto
       parameters:
@@ -29,10 +29,10 @@ paths:
           description: '{}'
         "400":
           description: body is empty
-  /derechos_pecuniarios/conceptos/{id}:
+  /derechos-pecuniarios/conceptos/{id}:
     put:
       tags:
-      - derechos_pecuniarios
+      - derechos-pecuniarios
       description: Modificar un concepto
       operationId: DerechosPecuniariosController.PutConcepto
       parameters:
@@ -53,7 +53,7 @@ paths:
           description: no data found
     delete:
       tags:
-      - derechos_pecuniarios
+      - derechos-pecuniarios
       description: Inactivar Concepto y Factor por id
       operationId: DerechosPecuniariosController.DeleteConcepto
       parameters:
@@ -67,10 +67,10 @@ paths:
           description: '{}'
         "403":
           description: :id is empty
-  /derechos_pecuniarios/conceptos/costo:
+  /derechos-pecuniarios/conceptos/costo:
     post:
       tags:
-      - derechos_pecuniarios
+      - derechos-pecuniarios
       description: Añadir el costo de un concepto existente
       operationId: DerechosPecuniariosController.PutCostoConcepto
       parameters:
@@ -85,10 +85,10 @@ paths:
           description: '{}'
         "400":
           description: :body is empty
-  /derechos_pecuniarios/derechos:
+  /derechos-pecuniarios/derechos:
     post:
       tags:
-      - derechos_pecuniarios
+      - derechos-pecuniarios
       description: Generar un recibo de derecho pecuniario por parte de estudiantes
       operationId: DerechosPecuniariosController.PostGenerarrDerechoPecuniarioEstudiante
       parameters:
@@ -105,10 +105,10 @@ paths:
           description: body is empty
         "404":
           description: not found resource
-  /derechos_pecuniarios/personas/{persona_id}:
+  /derechos-pecuniarios/personas/{persona_id}:
     get:
       tags:
-      - derechos_pecuniarios
+      - derechos-pecuniarios
       description: get información del estudainte por el id de tercero
       operationId: DerechosPecuniariosController.GetConsultarPersona
       parameters:
@@ -123,10 +123,10 @@ paths:
           description: '{}'
         "404":
           description: not found resource
-  /derechos_pecuniarios/personas/{persona_id}/periodos/{id_periodo}/estados_recibos:
+  /derechos-pecuniarios/personas/{persona_id}/periodos/{id_periodo}/estados_recibos:
     get:
       tags:
-      - derechos_pecuniarios
+      - derechos-pecuniarios
       description: consultar los estados de todos los recibos de derechos pecuniarios generados por el tercero
       operationId: DerechosPecuniariosController.GetEstadoRecibo
       parameters:
@@ -147,10 +147,10 @@ paths:
           description: '{}'
         "404":
           description: not found resource
-  /derechos_pecuniarios/solicitudes:
+  /derechos-pecuniarios/solicitudes:
     get:
       tags:
-      - derechos_pecuniarios
+      - derechos-pecuniarios
       description: Obtener todos las solicitudes de derechos pecuniarios
       operationId: DerechosPecuniariosController.GetSolicitudDerechoPecuniario
       responses:
@@ -160,7 +160,7 @@ paths:
           description: body is empty
     post:
       tags:
-      - derechos_pecuniarios
+      - derechos-pecuniarios
       description: Crear una solicitud de derecho pecuniario
       operationId: DerechosPecuniariosController.PostSolicitudDerechoPecuniario
       parameters:
@@ -175,10 +175,10 @@ paths:
           description: '{}'
         "400":
           description: body is empty
-  /derechos_pecuniarios/solicitudes/{id}/respuesta:
+  /derechos-pecuniarios/solicitudes/{id}/respuesta:
     post:
       tags:
-      - derechos_pecuniarios
+      - derechos-pecuniarios
       description: Da respuesta a la solicitud de derechos pecuniarios
       operationId: DerechosPecuniariosController.PostRespuestaSolicitudDerechoPecuniario
       parameters:
@@ -193,10 +193,10 @@ paths:
           description: '{}'
         "400":
           description: body is empty
-  /derechos_pecuniarios/vigencias/{id}:
+  /derechos-pecuniarios/vigencias/{id}:
     get:
       tags:
-      - derechos_pecuniarios
+      - derechos-pecuniarios
       description: Consulta los derechos pecuniarias de la vigencia por id
       operationId: DerechosPecuniariosController.GetDerechosPecuniariosPorVigencia
       parameters:
@@ -213,10 +213,10 @@ paths:
           description: :id is empty
         "404":
           description: no data found
-  /derechos_pecuniarios/vigencias/clonar_conceptos:
+  /derechos-pecuniarios/vigencias/clonar_conceptos:
     post:
       tags:
-      - derechos_pecuniarios
+      - derechos-pecuniarios
       description: Clona los conceptos de la vigencia anterior en la vigencia actual
       operationId: DerechosPecuniariosController.PostClonarConceptos
       parameters:

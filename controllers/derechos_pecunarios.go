@@ -45,7 +45,7 @@ func (c *DerechosPecuniariosController) PostConcepto() {
 		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, resultado)
 	} else {
 		c.Ctx.Output.SetStatus(404)
-		c.Data["json"] = requestresponse.APIResponseDTO(true, 404, nil, err.Error())
+		c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, err.Error())
 	}
 
 	c.ServeJSON()
@@ -73,7 +73,7 @@ func (c *DerechosPecuniariosController) PutConcepto() {
 		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, resultado)
 	} else {
 		c.Ctx.Output.SetStatus(404)
-		c.Data["json"] = requestresponse.APIResponseDTO(true, 404, nil, err.Error())
+		c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, err.Error())
 	}
 
 	c.ServeJSON()
@@ -98,7 +98,7 @@ func (c *DerechosPecuniariosController) DeleteConcepto() {
 		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, resultado)
 	} else {
 		c.Ctx.Output.SetStatus(404)
-		c.Data["json"] = requestresponse.APIResponseDTO(true, 404, nil, err.Error())
+		c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, err.Error())
 	}
 
 	c.ServeJSON()
@@ -124,7 +124,7 @@ func (c *DerechosPecuniariosController) GetDerechosPecuniariosPorVigencia() {
 		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, resultado)
 	} else {
 		c.Ctx.Output.SetStatus(404)
-		c.Data["json"] = requestresponse.APIResponseDTO(true, 404, nil, err.Error())
+		c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, err.Error())
 	}
 
 	c.ServeJSON()
@@ -149,7 +149,7 @@ func (c *DerechosPecuniariosController) PostClonarConceptos() {
 		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, resultado)
 	} else {
 		c.Ctx.Output.SetStatus(404)
-		c.Data["json"] = requestresponse.APIResponseDTO(true, 404, nil, err.Error())
+		c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, err.Error())
 	}
 
 	c.ServeJSON()
@@ -174,7 +174,7 @@ func (c *DerechosPecuniariosController) PutCostoConcepto() {
 		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, resultado)
 	} else {
 		c.Ctx.Output.SetStatus(404)
-		c.Data["json"] = requestresponse.APIResponseDTO(true, 404, nil, err.Error())
+		c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, err.Error())
 	}
 
 	c.ServeJSON()
@@ -200,7 +200,7 @@ func (c *DerechosPecuniariosController) PostGenerarDerechoPecuniarioEstudiante()
 		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, resultado)
 	} else {
 		c.Ctx.Output.SetStatus(404)
-		c.Data["json"] = requestresponse.APIResponseDTO(true, 404, nil, err.Error())
+		c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, err.Error())
 	}
 
 	c.ServeJSON()
@@ -227,7 +227,7 @@ func (c *DerechosPecuniariosController) GetEstadoRecibo() {
 		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, resultado)
 	} else {
 		c.Ctx.Output.SetStatus(404)
-		c.Data["json"] = requestresponse.APIResponseDTO(true, 404, nil, err.Error())
+		c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, err.Error())
 	}
 
 	c.ServeJSON()
@@ -253,7 +253,7 @@ func (c *DerechosPecuniariosController) GetConsultarPersona() {
 		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, resultado)
 	} else {
 		c.Ctx.Output.SetStatus(404)
-		c.Data["json"] = requestresponse.APIResponseDTO(true, 404, nil, err.Error())
+		c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, err.Error())
 	}
 
 	c.ServeJSON()
@@ -278,7 +278,7 @@ func (c *DerechosPecuniariosController) PostSolicitudDerechoPecuniario() {
 		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, resultado)
 	} else {
 		c.Ctx.Output.SetStatus(404)
-		c.Data["json"] = requestresponse.APIResponseDTO(true, 404, nil, err.Error())
+		c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, err.Error())
 	}
 
 	c.ServeJSON()
@@ -300,7 +300,7 @@ func (c *DerechosPecuniariosController) GetSolicitudDerechoPecuniario() {
 		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, resultado)
 	} else {
 		c.Ctx.Output.SetStatus(404)
-		c.Data["json"] = requestresponse.APIResponseDTO(true, 404, nil, err.Error())
+		c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, err.Error())
 	}
 
 	c.ServeJSON()
@@ -327,7 +327,7 @@ func (c *DerechosPecuniariosController) PostRespuestaSolicitudDerechoPecuniario(
 		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, resultado)
 	} else {
 		c.Ctx.Output.SetStatus(404)
-		c.Data["json"] = requestresponse.APIResponseDTO(true, 404, nil, err.Error())
+		c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, err.Error())
 	}
 
 	c.ServeJSON()

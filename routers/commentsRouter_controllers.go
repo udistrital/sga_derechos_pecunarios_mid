@@ -37,7 +37,7 @@ func init() {
     beego.GlobalControllerRouter["github.com/udistrital/sga_derecho_pecunario_mid/controllers:DerechosPecuniariosController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_derecho_pecunario_mid/controllers:DerechosPecuniariosController"],
         beego.ControllerComments{
             Method: "PutCostoConcepto",
-            Router: "/conceptos/costo",
+            Router: "/conceptos/costos",
             AllowHTTPMethods: []string{"post"},
             MethodParams: param.Make(),
             Filters: nil,
@@ -64,7 +64,7 @@ func init() {
     beego.GlobalControllerRouter["github.com/udistrital/sga_derecho_pecunario_mid/controllers:DerechosPecuniariosController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_derecho_pecunario_mid/controllers:DerechosPecuniariosController"],
         beego.ControllerComments{
             Method: "GetEstadoRecibo",
-            Router: "/personas/:persona_id/periodos/:id_periodo/estados_recibos",
+            Router: "/personas/:persona_id/periodos/:periodo_id/recibos",
             AllowHTTPMethods: []string{"get"},
             MethodParams: param.Make(),
             Filters: nil,
@@ -109,7 +109,7 @@ func init() {
     beego.GlobalControllerRouter["github.com/udistrital/sga_derecho_pecunario_mid/controllers:DerechosPecuniariosController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_derecho_pecunario_mid/controllers:DerechosPecuniariosController"],
         beego.ControllerComments{
             Method: "PostClonarConceptos",
-            Router: "/vigencias/clonar_conceptos",
+            Router: "/vigencias/clonar-conceptos",
             AllowHTTPMethods: []string{"post"},
             MethodParams: param.Make(),
             Filters: nil,

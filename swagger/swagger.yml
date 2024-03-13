@@ -67,7 +67,7 @@ paths:
           description: '{}'
         "403":
           description: :id is empty
-  /derechos-pecuniarios/conceptos/costo:
+  /derechos-pecuniarios/conceptos/costos:
     post:
       tags:
       - derechos-pecuniarios
@@ -123,7 +123,7 @@ paths:
           description: '{}'
         "404":
           description: not found resource
-  /derechos-pecuniarios/personas/{persona_id}/periodos/{id_periodo}/estados_recibos:
+  /derechos-pecuniarios/personas/{persona_id}/periodos/{periodo_id}/recibos:
     get:
       tags:
       - derechos-pecuniarios
@@ -137,7 +137,7 @@ paths:
         type: integer
         format: int64
       - in: path
-        name: id_periodo
+        name: periodo_id
         description: Id del ultimo periodo
         required: true
         type: integer
@@ -213,7 +213,7 @@ paths:
           description: :id is empty
         "404":
           description: no data found
-  /derechos-pecuniarios/vigencias/clonar_conceptos:
+  /derechos-pecuniarios/vigencias/clonar-conceptos:
     post:
       tags:
       - derechos-pecuniarios

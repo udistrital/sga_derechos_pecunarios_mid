@@ -5,6 +5,7 @@ RUN apt-get install libmcrypt-dev -y
 
 RUN pip install awscli
 WORKDIR /
+COPY resources resources
 COPY entrypoint.sh entrypoint.sh
 COPY main main
 COPY conf/app.conf conf/app.conf

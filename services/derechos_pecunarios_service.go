@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 
@@ -38,7 +37,7 @@ func PostConcepto(data []byte) (interface{}, error) {
 			if ConceptoPost["Status"] == 400 {
 				logs.Error(errConcepto)
 				exito = false
-			} 
+			}
 		} else {
 			logs.Error(errConcepto)
 			exito = false
@@ -494,19 +493,17 @@ func GetEstadoRecibo(idPersona string, idPeriodo string) (interface{}, error) {
 									if CodConcepto != nil {
 										IdConcepto = CodConcepto.(string)
 									} else {
-										jsonData, err := os.ReadFile("resources/homologacion-concepto.json")
-										if err != nil {
-											fmt.Println("Error al leer el archivo:", err)
-											return nil, err
+										var homologacionMap = map[string]string{
+											"CERTIFICADO DE NOTAS":             "40",
+											"DERECHOS DE GRADO":                "50",
+											"DUPLICADO DEL DIPLOMA DE GRADO":   "51",
+											"DUPLICADO DEL CARNET ESTUDIANTIL": "44",
+											"CURSOS VACIONALES":                "31",
+											"CONSTANCIAS DE ESTUDIO":           "41",
+											"COPIA ACTA DE GRADO":              "49",
+											"CARNET ESTUDIANTIL":               "42",
+											"Inscripcion Virtual":              "40",
 										}
-
-										homologacionMap := make(map[string]string)
-										err = json.Unmarshal(jsonData, &homologacionMap)
-										if err != nil {
-											fmt.Println("Error al decodificar el archivo:", err)
-											return nil, err
-										}
-
 										IdConcepto = homologacionMap[concepto.(string)]
 									}
 

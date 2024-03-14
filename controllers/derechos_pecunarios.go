@@ -193,16 +193,9 @@ func (c *DerechosPecuniariosController) PostGenerarDerechoPecuniarioEstudiante()
 
 	data := c.Ctx.Input.RequestBody
 
-	resultado, err := services.PostGenerarDerechoPecuniarioEstudiante(data)
-
-	if err == nil {
-		c.Ctx.Output.SetStatus(200)
-		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, resultado)
-	} else {
-		c.Ctx.Output.SetStatus(404)
-		c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, err.Error())
-	}
-
+	resultado := services.PostGenerarDerechoPecuniarioEstudiante(data)
+	c.Ctx.Output.SetStatus(resultado.Status)
+	c.Data["json"] = resultado
 	c.ServeJSON()
 }
 

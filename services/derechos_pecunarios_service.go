@@ -14,6 +14,7 @@ import (
 	"github.com/udistrital/sga_derecho_pecunario_mid/helpers"
 	"github.com/udistrital/sga_derecho_pecunario_mid/models"
 	"github.com/udistrital/utils_oas/request"
+	"github.com/udistrital/utils_oas/requestresponse"
 )
 
 func PostConcepto(data []byte) (interface{}, error) {
@@ -38,7 +39,7 @@ func PostConcepto(data []byte) (interface{}, error) {
 			if ConceptoPost["Status"] == 400 {
 				logs.Error(errConcepto)
 				exito = false
-			} 
+			}
 		} else {
 			logs.Error(errConcepto)
 			exito = false
@@ -317,7 +318,7 @@ func PutCostoConcepto(data []byte) (interface{}, error) {
 	return nil, errors.New("error del servicio PutCostoConcepto: La solicitud contiene un tipo de dato incorrecto o un parámetro inválido")
 }
 
-func PostGenerarDerechoPecuniarioEstudiante(data []byte) (interface{}, error) {
+func PostGenerarDerechoPecuniarioEstudiante(data []byte) requestresponse.APIResponse {
 	var SolicitudDerechoPecuniario map[string]interface{}
 	var TipoParametro string
 	var Derecho map[string]interface{}
@@ -325,7 +326,6 @@ func PostGenerarDerechoPecuniarioEstudiante(data []byte) (interface{}, error) {
 	var Valor map[string]interface{}
 	var NuevoRecibo map[string]interface{}
 	var complementario map[string]interface{}
-	var errorGetAll bool
 
 	if err := json.Unmarshal(data, &SolicitudDerechoPecuniario); err == nil {
 		if fmt.Sprintf("%v", SolicitudDerechoPecuniario) != "map[]" {
@@ -410,37 +410,30 @@ func PostGenerarDerechoPecuniarioEstudiante(data []byte) (interface{}, error) {
 
 							errComplementarioPost := request.SendJson("http://"+beego.AppConfig.String("TercerosService")+"info_complementaria_tercero", "POST", &complementario, derechoPecuniarioSolicitado)
 							if errComplementarioPost != nil {
-								logs.Error(errComplementarioPost)
-								errorGetAll = true
+								return requestresponse.APIResponseDTO(true, 204, nil, errComplementarioPost.Error())
+							} else {
+								return requestresponse.APIResponseDTO(true, 200, complementario)
 							}
 						}
 
 					} else {
-						errorGetAll = true
-						logs.Error(errJson)
+						return requestresponse.APIResponseDTO(false, 404, nil, errJson)
 					}
 
 				} else {
-					errorGetAll = true
-					logs.Error(errCodigo)
+					return requestresponse.APIResponseDTO(false, 404, nil, errCodigo)
 				}
 			} else {
-				errorGetAll = true
-				logs.Error(errParam)
+				return requestresponse.APIResponseDTO(false, 404, nil, errParam)
 			}
 		} else {
-			errorGetAll = true
-			logs.Error(err)
+			return requestresponse.APIResponseDTO(false, 404, nil, err)
 		}
 	} else {
-		errorGetAll = true
-		logs.Error(err)
+		return requestresponse.APIResponseDTO(false, 404, nil, err)
 	}
 
-	if !errorGetAll {
-		return complementario, nil
-	}
-	return nil, errors.New("error del servicio PostGenerarDerechoPecuniarioEstudiante: La solicitud contiene un tipo de dato incorrecto o un parámetro inválido")
+	return requestresponse.APIResponseDTO(false, 404, nil, "error del servicio PostGenerarDerechoPecuniarioEstudiante: La solicitud contiene un tipo de dato incorrecto o un parámetro inválido")
 }
 
 func GetEstadoRecibo(idPersona string, idPeriodo string) (interface{}, error) {

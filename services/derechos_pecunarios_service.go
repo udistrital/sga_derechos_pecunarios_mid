@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/httplib"
@@ -15,6 +16,7 @@ import (
 	"github.com/udistrital/sga_derecho_pecunario_mid/models"
 	"github.com/udistrital/utils_oas/request"
 	"github.com/udistrital/utils_oas/requestresponse"
+	"golang.org/x/sync/errgroup"
 )
 
 func PostConcepto(data []byte) (interface{}, error) {
@@ -851,64 +853,76 @@ func PostSolicitudDerechoPecuniario(data []byte) (interface{}, error) {
 
 func GetSolicitudDerechoPecuniario() (interface{}, error) {
 	var Solicitudes []map[string]interface{}
-	var DatosIdentificacion []map[string]interface{}
 	resultado := make([]map[string]interface{}, 0)
 	var errorGetAll bool
+	wge := new(errgroup.Group)
+	var mutex sync.Mutex // Mutex para proteger el acceso a resultados
 
 	errSolicitudes := request.GetJson("http://"+beego.AppConfig.String("SolicitudDocenteService")+"solicitud?query=EstadoTipoSolicitudId.Id:41,Activo:true&limit=0", &Solicitudes)
 	if errSolicitudes == nil {
 		if Solicitudes != nil && fmt.Sprintf("%v", Solicitudes[0]) != "map[]" && Solicitudes[0]["Resultado"] != nil {
+			wge.SetLimit(-1)
 			for _, solicitud := range Solicitudes {
-				referencia := solicitud["Referencia"].(string)
-				FechaCreacion := fmt.Sprintf("%v", solicitud["FechaCreacion"])
-
-				var referenciaJson map[string]interface{}
-				if err := json.Unmarshal([]byte(referencia), &referenciaJson); err == nil {
-					VerSoporte := fmt.Sprintf("%v", referenciaJson["DocSoportePago"].([]interface{})[0].(map[string]interface{})["Id"])
-					TerceroSolicitanteId := fmt.Sprintf("%v", referenciaJson["TerceroSolicitante"].(map[string]interface{})["Id"])
-					Nombre := fmt.Sprintf("%v", referenciaJson["TerceroSolicitante"].(map[string]interface{})["NombreCompleto"])
-					Codigo := fmt.Sprintf("%v", referenciaJson["CodigoEstudiante"])
-					DerechoPecuniarioId := referenciaJson["DerechoPecuniarioId"]
-					DerechoValor := referenciaJson["DerechoPecuniarioId"].(map[string]interface{})["Valor"].(string)
-					var valorJson map[string]interface{}
-					valor := "0"
-					if err := json.Unmarshal([]byte(DerechoValor), &valorJson); err == nil {
-						valor = fmt.Sprintf("%v", valorJson["Costo"])
-					}
-
-					errIdentificacion := request.GetJson("http://"+beego.AppConfig.String("TercerosService")+"datos_identificacion?limit=0&query=TerceroId.Id:"+TerceroSolicitanteId+",Activo:True", &DatosIdentificacion)
-					if errIdentificacion == nil {
-						if DatosIdentificacion != nil && fmt.Sprintf("%v", DatosIdentificacion[0]) != "map[]" {
-							NombreIdentificacion := fmt.Sprintf("%v", DatosIdentificacion[0]["TipoDocumentoId"].(map[string]interface{})["Nombre"])
-							CAIdentificacion := fmt.Sprintf("%v", DatosIdentificacion[0]["TipoDocumentoId"].(map[string]interface{})["CodigoAbreviacion"])
-							Identificacion := NombreIdentificacion + " - " + CAIdentificacion
-
-							resultadoAux := map[string]interface{}{
-								"FechaCreacion":        FechaCreacion,
-								"VerSoporte":           VerSoporte,
-								"Nombre":               Nombre,
-								"Codigo":               Codigo,
-								"DerechoPecuniarioId":  DerechoPecuniarioId,
-								"NombreIdentificacion": NombreIdentificacion,
-								"CAIdentificacion":     CAIdentificacion,
-								"Identificacion":       Identificacion,
-								"Concepto":             fmt.Sprintf("%v", DerechoPecuniarioId.(map[string]interface{})["ParametroId"].(map[string]interface{})["Nombre"]),
-								"Valor":                valor,
-								"Id":                   fmt.Sprintf("%v", solicitud["Id"]),
-								"Estado":               fmt.Sprintf("%v", solicitud["EstadoTipoSolicitudId"].(map[string]interface{})["EstadoId"].(map[string]interface{})["Nombre"]),
+				wge.Go(func () error{
+					referencia := solicitud["Referencia"].(string)
+					FechaCreacion := fmt.Sprintf("%v", solicitud["FechaCreacion"])
+	
+					var referenciaJson map[string]interface{}
+					if err := json.Unmarshal([]byte(referencia), &referenciaJson); err == nil {
+						VerSoporte := fmt.Sprintf("%v", referenciaJson["DocSoportePago"].([]interface{})[0].(map[string]interface{})["Id"])
+						TerceroSolicitanteId := fmt.Sprintf("%v", referenciaJson["TerceroSolicitante"].(map[string]interface{})["Id"])
+						Nombre := fmt.Sprintf("%v", referenciaJson["TerceroSolicitante"].(map[string]interface{})["NombreCompleto"])
+						Codigo := fmt.Sprintf("%v", referenciaJson["CodigoEstudiante"])
+						DerechoPecuniarioId := referenciaJson["DerechoPecuniarioId"]
+						DerechoValor := referenciaJson["DerechoPecuniarioId"].(map[string]interface{})["Valor"].(string)
+						var valorJson map[string]interface{}
+						valor := "0"
+						if err := json.Unmarshal([]byte(DerechoValor), &valorJson); err == nil {
+							valor = fmt.Sprintf("%v", valorJson["Costo"])
+						}
+	
+						var DatosIdentificacion []map[string]interface{}
+						errIdentificacion := request.GetJson("http://"+beego.AppConfig.String("TercerosService")+"datos_identificacion?limit=0&query=TerceroId.Id:"+TerceroSolicitanteId+",Activo:True", &DatosIdentificacion)
+						if errIdentificacion == nil {
+							if DatosIdentificacion != nil && fmt.Sprintf("%v", DatosIdentificacion[0]) != "map[]" {
+								NombreIdentificacion := fmt.Sprintf("%v", DatosIdentificacion[0]["TipoDocumentoId"].(map[string]interface{})["Nombre"])
+								CAIdentificacion := fmt.Sprintf("%v", DatosIdentificacion[0]["TipoDocumentoId"].(map[string]interface{})["CodigoAbreviacion"])
+								Identificacion := NombreIdentificacion + " - " + CAIdentificacion
+	
+								resultadoAux := map[string]interface{}{
+									"FechaCreacion":        FechaCreacion,
+									"VerSoporte":           VerSoporte,
+									"Nombre":               Nombre,
+									"Codigo":               Codigo,
+									"DerechoPecuniarioId":  DerechoPecuniarioId,
+									"NombreIdentificacion": NombreIdentificacion,
+									"CAIdentificacion":     CAIdentificacion,
+									"Identificacion":       Identificacion,
+									"Concepto":             fmt.Sprintf("%v", DerechoPecuniarioId.(map[string]interface{})["ParametroId"].(map[string]interface{})["Nombre"]),
+									"Valor":                valor,
+									"Id":                   fmt.Sprintf("%v", solicitud["Id"]),
+									"Estado":               fmt.Sprintf("%v", solicitud["EstadoTipoSolicitudId"].(map[string]interface{})["EstadoId"].(map[string]interface{})["Nombre"]),
+								}
+								mutex.Lock()
+								resultado = append(resultado, resultadoAux)
+								mutex.Unlock()
+							} else {
+								return errors.New("Data not found")
 							}
-
-							resultado = append(resultado, resultadoAux)
 						} else {
-							errorGetAll = true
+							return errIdentificacion
 						}
 					} else {
-						errorGetAll = true
+						return err
 					}
-				} else {
-					errorGetAll = true
-				}
+					return nil
+				})
 			}
+			//Si existe error, se realiza
+			if err := wge.Wait(); err != nil {
+				return nil, err
+			}
+
 		} else {
 			errorGetAll = true
 		}

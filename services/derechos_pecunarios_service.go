@@ -392,13 +392,16 @@ func PostGenerarDerechoPecuniarioEstudiante(data []byte) requestresponse.APIResp
 						}
 
 						SolicitudRecibo := objTransaccion
-
+						fmt.Println("Solicitud")
+						fmt.Println(SolicitudRecibo)
 						reciboSolicitud := httplib.Post("http://" + beego.AppConfig.String("GenerarReciboJbpmService") + "recibos_pago_proxy")
 						reciboSolicitud.Header("Accept", "application/json")
 						reciboSolicitud.Header("Content-Type", "application/json")
 						reciboSolicitud.JSONBody(SolicitudRecibo)
 
-						if errRecibo := reciboSolicitud.ToJSON(&NuevoRecibo); errRecibo == nil {
+						if errRecibo := reciboSolicitud.ToJSON(&NuevoRecibo); errRecibo == nil && fmt.Sprintf("%v", NuevoRecibo) != "map[]" {
+							fmt.Println("Respuesta recibo")
+							fmt.Println(NuevoRecibo)
 							derechoPecuniarioSolicitado := map[string]interface{}{
 								"TerceroId": map[string]interface{}{
 									"Id": SolicitudDerechoPecuniario["Id"].(float64),
@@ -416,6 +419,8 @@ func PostGenerarDerechoPecuniarioEstudiante(data []byte) requestresponse.APIResp
 							} else {
 								return requestresponse.APIResponseDTO(true, 200, complementario)
 							}
+						}else {
+							return requestresponse.APIResponseDTO(false, 404, nil, errors.New("Fallo en al generacion del recibo"))
 						}
 
 					} else {
@@ -435,7 +440,7 @@ func PostGenerarDerechoPecuniarioEstudiante(data []byte) requestresponse.APIResp
 		return requestresponse.APIResponseDTO(false, 404, nil, err)
 	}
 
-	return requestresponse.APIResponseDTO(false, 404, nil, "error del servicio PostGenerarDerechoPecuniarioEstudiante: La solicitud contiene un tipo de dato incorrecto o un parámetro inválido")
+	//return requestresponse.APIResponseDTO(false, 404, nil, "error del servicio PostGenerarDerechoPecuniarioEstudiante: La solicitud contiene un tipo de dato incorrecto o un parámetro inválido")
 }
 
 func GetEstadoRecibo(idPersona string, idPeriodo string) (interface{}, error) {
@@ -457,9 +462,9 @@ func GetEstadoRecibo(idPersona string, idPeriodo string) (interface{}, error) {
 			PeriodoConsulta = fmt.Sprint(Periodo["Data"].([]interface{})[0].(map[string]interface{})["Year"])
 
 			//Se consultan todos los recibos de derechos pecuniarios relacionados a ese tercero
-			errRecibo := request.GetJson("http://"+beego.AppConfig.String("TercerosService")+"info_complementaria_tercero?limit=0&query=InfoComplementariaId.Id:307,TerceroId.Id:"+idPersona, &Recibos)
+			errRecibo := request.GetJson("http://"+beego.AppConfig.String("TercerosService")+"info_complementaria_tercero?query=InfoComplementariaId.Id:307,TerceroId.Id:"+idPersona+"&limit=0", &Recibos)
 			if errRecibo == nil {
-				if Recibos != nil && fmt.Sprintf("%v", Recibos[0]) != "map[]" {
+				if Recibos != nil && fmt.Sprintf("%v", Recibos) != "[map[]]" {
 					// Ciclo for que recorre todos los recibos de derechos pecuniarios solicitados por el tercero
 					resultadoAux = make([]map[string]interface{}, len(Recibos))
 					for i := 0; i < len(Recibos); i++ {

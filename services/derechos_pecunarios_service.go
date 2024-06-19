@@ -400,7 +400,7 @@ func PostGenerarDerechoPecuniarioEstudiante(data []byte) requestresponse.APIResp
 						reciboSolicitud.JSONBody(SolicitudRecibo)
 
 						if errRecibo := reciboSolicitud.ToJSON(&NuevoRecibo); errRecibo == nil && fmt.Sprintf("%v", NuevoRecibo) != "map[]" {
-							fmt.Println("Respuesta recibo")
+							fmt.Println("Respuesta recib")
 							fmt.Println(NuevoRecibo)
 							derechoPecuniarioSolicitado := map[string]interface{}{
 								"TerceroId": map[string]interface{}{

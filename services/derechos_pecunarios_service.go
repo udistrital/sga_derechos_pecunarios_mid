@@ -392,16 +392,12 @@ func PostGenerarDerechoPecuniarioEstudiante(data []byte) requestresponse.APIResp
 						}
 
 						SolicitudRecibo := objTransaccion
-						fmt.Println("Solicitud")
-						fmt.Println(SolicitudRecibo)
 						reciboSolicitud := httplib.Post("http://" + beego.AppConfig.String("GenerarReciboJbpmService") + "recibos_pago_proxy")
 						reciboSolicitud.Header("Accept", "application/json")
 						reciboSolicitud.Header("Content-Type", "application/json")
 						reciboSolicitud.JSONBody(SolicitudRecibo)
 
 						if errRecibo := reciboSolicitud.ToJSON(&NuevoRecibo); errRecibo == nil && fmt.Sprintf("%v", NuevoRecibo) != "map[]" {
-							fmt.Println("Respuesta recib")
-							fmt.Println(NuevoRecibo)
 							derechoPecuniarioSolicitado := map[string]interface{}{
 								"TerceroId": map[string]interface{}{
 									"Id": SolicitudDerechoPecuniario["Id"].(float64),
@@ -450,7 +446,7 @@ func GetEstadoRecibo(idPersona string, idPeriodo string) (interface{}, error) {
 	var resultadoAux []map[string]interface{}
 	resultado := make([]map[string]interface{}, 0)
 	var Derecho map[string]interface{}
-	var Programa map[string]interface{}
+	var Programa []map[string]interface{}
 	var Solicitudes []map[string]interface{}
 	var Estado string
 	var PeriodoConsulta string
@@ -474,7 +470,6 @@ func GetEstadoRecibo(idPersona string, idPeriodo string) (interface{}, error) {
 						if err := json.Unmarshal([]byte(Recibos[i]["Dato"].(string)), &reciboJson); err == nil {
 							ReciboDerecho = fmt.Sprintf("%v", reciboJson["Recibo"])
 						}
-
 						if strings.Split(ReciboDerecho, "/")[1] == PeriodoConsulta {
 							errRecibo := request.GetJsonWSO2("http://"+beego.AppConfig.String("ConsultarReciboJbpmService")+"consulta_recibo/"+ReciboDerecho, &ReciboXML)
 							if errRecibo == nil {
@@ -573,10 +568,10 @@ func GetEstadoRecibo(idPersona string, idPeriodo string) (interface{}, error) {
 										}
 									}
 
-									errPrograma := request.GetJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"proyecto_academico_institucion/"+fmt.Sprintf("%v", ProgramaAcademicoId), &Programa)
+									errPrograma := request.GetJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"proyecto_academico_institucion?query=Codigo:"+fmt.Sprintf("%v", ProgramaAcademicoId), &Programa)
 									nombrePrograma := "---"
-									if errPrograma == nil {
-										nombrePrograma = fmt.Sprint(Programa["Nombre"])
+									if errPrograma == nil && fmt.Sprintf("%v", Programa) != "[map[]]" {
+										nombrePrograma = fmt.Sprint(Programa[0]["Nombre"])
 									}
 
 									resultadoAux[i] = map[string]interface{}{

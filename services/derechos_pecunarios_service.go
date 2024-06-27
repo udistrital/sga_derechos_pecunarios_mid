@@ -857,7 +857,7 @@ func GetSolicitudDerechoPecuniario() (interface{}, error) {
 
 					var referenciaJson map[string]interface{}
 					if err := json.Unmarshal([]byte(referencia), &referenciaJson); err == nil {
-						VerSoporte := fmt.Sprintf("%v", referenciaJson["DocSoportePago"].([]interface{})[0].(map[string]interface{})["Id"])
+						VerSoporte := fmt.Sprintf("%v", referenciaJson["DocSoportePago"].(map[string]interface{})["Id"])
 						TerceroSolicitanteId := fmt.Sprintf("%v", referenciaJson["TerceroSolicitante"].(map[string]interface{})["Id"])
 						Nombre := fmt.Sprintf("%v", referenciaJson["TerceroSolicitante"].(map[string]interface{})["NombreCompleto"])
 						Codigo := fmt.Sprintf("%v", referenciaJson["CodigoEstudiante"])

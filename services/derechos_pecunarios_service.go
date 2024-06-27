@@ -415,7 +415,7 @@ func PostGenerarDerechoPecuniarioEstudiante(data []byte) requestresponse.APIResp
 							} else {
 								return requestresponse.APIResponseDTO(true, 200, complementario)
 							}
-						}else {
+						} else {
 							return requestresponse.APIResponseDTO(false, 404, nil, errors.New("Fallo en al generacion del recibo"))
 						}
 
@@ -694,7 +694,6 @@ func GetConsultarPersona(idPersona string) (interface{}, error) {
 
 func PostSolicitudDerechoPecuniario(data []byte) (interface{}, error) {
 	var Referencia string
-	var resDocs []interface{}
 	var SolicitudPost map[string]interface{}
 	var SolicitantePost map[string]interface{}
 	var SolicitudEvolucionEstadoPost map[string]interface{}
@@ -708,27 +707,12 @@ func PostSolicitudDerechoPecuniario(data []byte) (interface{}, error) {
 
 	if err := json.Unmarshal(data, &SolicitudData); err == nil {
 
-		auxDoc := []map[string]interface{}{}
-		documento := map[string]interface{}{
-			"IdTipoDocumento": SolicitudData["comprobanteRecibo"].(map[string]interface{})["IdTipoDocumento"],
-			"nombre":          SolicitudData["comprobanteRecibo"].(map[string]interface{})["nombre"],
-			"metadatos":       SolicitudData["comprobanteRecibo"].(map[string]interface{})["metadatos"],
-			"descripcion":     SolicitudData["comprobanteRecibo"].(map[string]interface{})["descripcion"],
-			"file":            SolicitudData["comprobanteRecibo"].(map[string]interface{})["file"],
-		}
-		auxDoc = append(auxDoc, documento)
-
-		doc, errDoc := models.RegistrarDoc(auxDoc)
-		if errDoc == nil {
-			docTem := map[string]interface{}{
-				"Nombre":        doc.(map[string]interface{})["Nombre"].(string),
-				"Enlace":        doc.(map[string]interface{})["Enlace"],
-				"Id":            doc.(map[string]interface{})["Id"],
-				"TipoDocumento": doc.(map[string]interface{})["TipoDocumento"],
-				"Activo":        doc.(map[string]interface{})["Activo"],
-			}
-
-			resDocs = append(resDocs, docTem)
+		resDocs := map[string]interface{}{
+			"Nombre":        SolicitudData["comprobanteRecibo"].(map[string]interface{})["Nombre"].(string),
+			"Enlace":        SolicitudData["comprobanteRecibo"].(map[string]interface{})["Enlace"],
+			"Id":            SolicitudData["comprobanteRecibo"].(map[string]interface{})["Id"],
+			"TipoDocumento": SolicitudData["comprobanteRecibo"].(map[string]interface{})["TipoDocumento"],
+			"Activo":        SolicitudData["comprobanteRecibo"].(map[string]interface{})["Activo"],
 		}
 
 		var jsonTerceroSolicitante []byte
@@ -738,6 +722,8 @@ func PostSolicitudDerechoPecuniario(data []byte) (interface{}, error) {
 		if errTercero == nil && TerceroSolicitante != nil {
 			if fmt.Sprintf("%v", TerceroSolicitante) != "map[]" && TerceroSolicitante["Status"] != "404" {
 				jsonTerceroSolicitante, _ = json.Marshal(TerceroSolicitante)
+			} else {
+				fmt.Println("Falla tercero")
 			}
 		}
 
@@ -754,6 +740,8 @@ func PostSolicitudDerechoPecuniario(data []byte) (interface{}, error) {
 			",\n\"CodigoEstudiante\": " + fmt.Sprintf("%v", string(jsonCodigoEstudiante)) +
 			",\n\"DerechoPecuniarioId\": " + fmt.Sprintf("%v", string(jsonDerechoPecuniarioId)) + "\n}"
 
+		fmt.Print(Referencia)
+
 		IdEstadoTipoSolicitud := 41
 
 		SolicitudPracticas := map[string]interface{}{
@@ -762,8 +750,8 @@ func PostSolicitudDerechoPecuniario(data []byte) (interface{}, error) {
 			"Resultado":             "",
 			"FechaRadicacion":       fmt.Sprintf("%v", SolicitudData["FechaCreacion"]),
 			"Activo":                true,
-			"SolicitudPadreId":      nil,
 		}
+		fmt.Println(SolicitudPracticas)
 
 		errSolicitud := request.SendJson("http://"+beego.AppConfig.String("SolicitudDocenteService")+"solicitud", "POST", &SolicitudPost, SolicitudPracticas)
 		if errSolicitud == nil {
@@ -863,10 +851,10 @@ func GetSolicitudDerechoPecuniario() (interface{}, error) {
 		if Solicitudes != nil && fmt.Sprintf("%v", Solicitudes[0]) != "map[]" && Solicitudes[0]["Resultado"] != nil {
 			wge.SetLimit(-1)
 			for _, solicitud := range Solicitudes {
-				wge.Go(func () error{
+				wge.Go(func() error {
 					referencia := solicitud["Referencia"].(string)
 					FechaCreacion := fmt.Sprintf("%v", solicitud["FechaCreacion"])
-	
+
 					var referenciaJson map[string]interface{}
 					if err := json.Unmarshal([]byte(referencia), &referenciaJson); err == nil {
 						VerSoporte := fmt.Sprintf("%v", referenciaJson["DocSoportePago"].([]interface{})[0].(map[string]interface{})["Id"])
@@ -880,7 +868,7 @@ func GetSolicitudDerechoPecuniario() (interface{}, error) {
 						if err := json.Unmarshal([]byte(DerechoValor), &valorJson); err == nil {
 							valor = fmt.Sprintf("%v", valorJson["Costo"])
 						}
-	
+
 						var DatosIdentificacion []map[string]interface{}
 						errIdentificacion := request.GetJson("http://"+beego.AppConfig.String("TercerosService")+"datos_identificacion?limit=0&query=TerceroId.Id:"+TerceroSolicitanteId+",Activo:True", &DatosIdentificacion)
 						if errIdentificacion == nil {
@@ -888,7 +876,7 @@ func GetSolicitudDerechoPecuniario() (interface{}, error) {
 								NombreIdentificacion := fmt.Sprintf("%v", DatosIdentificacion[0]["TipoDocumentoId"].(map[string]interface{})["Nombre"])
 								CAIdentificacion := fmt.Sprintf("%v", DatosIdentificacion[0]["TipoDocumentoId"].(map[string]interface{})["CodigoAbreviacion"])
 								Identificacion := NombreIdentificacion + " - " + CAIdentificacion
-	
+
 								resultadoAux := map[string]interface{}{
 									"FechaCreacion":        FechaCreacion,
 									"VerSoporte":           VerSoporte,

@@ -851,6 +851,7 @@ func GetSolicitudDerechoPecuniario() (interface{}, error) {
 		if Solicitudes != nil && fmt.Sprintf("%v", Solicitudes[0]) != "map[]" && Solicitudes[0]["Resultado"] != nil {
 			wge.SetLimit(-1)
 			for _, solicitud := range Solicitudes {
+				solicitud = solicitud
 				wge.Go(func() error {
 					referencia := solicitud["Referencia"].(string)
 					FechaCreacion := fmt.Sprintf("%v", solicitud["FechaCreacion"])
